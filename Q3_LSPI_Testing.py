@@ -19,11 +19,13 @@ class DataSet:
         self.n_samples = N
         self.samples = []
         self.episodes = 0
+        self.RBF_kernals = []
+        self.n_kernals = 4
         self.means = np.array(2)
         self.stds = np.array(2)
-        self.phi = np.zeros((N, 3 * (len(self.environment.observation_space.sample()) + 1)))
+        self.phi = np.zeros((N, 3 * (self.n_kernals**2 + 1)))
         self.reward = np.zeros(N)
-        self.phi_next = np.zeros((N, 3 * (len(self.environment.observation_space.sample()) + 1), 3))
+        self.phi_next = np.zeros((N, 3 * (self.n_kernals**2 +1), 3))
 
         self.collect_data()
 
@@ -37,54 +39,65 @@ class DataSet:
 
             self.samples.append(Sample(curr_state, action, reward, next_state))
 
-    def RBF_kernal(self):
+    def get_mean_and_std(self):
         temp_vectors = np.zeros((len(self.samples), 2))
 
         for i, sample in enumerate(self.samples):
             temp_vectors[i] = (sample.curr_state + sample.next_state)/2
 
-        # self.means = np.mean(temp_vectors, axis=0)
-        self.means = np.array([0.6, -0.03])
-        # self.stds = np.std(temp_vectors, axis=0)
-        self.stds = np.array([0.9, 0.01])
+        self.means = np.mean(temp_vectors, axis=0)
+        self.stds = np.std(temp_vectors, axis=0)
+
+    def generate_RBF(self, n):
+        centers = np.arange(float(n))/float(n)
+        centers = np.random.uniform(-1, 1, n)
+        for i in range(n):
+            for j in range(n):
+                self.RBF_kernals.append([centers[i], centers[j]])
+        print(self.RBF_kernals)
+
+    def map2phi(self, state):
+        bandwidth = 100
+        phi_vector = np.zeros(int(self.n_kernals**2))
+        for i, kernel in enumerate(self.RBF_kernals):
+            phi_vector[i] = np.sum(np.exp(-np.abs(state - kernel)/bandwidth))
+        return np.append(phi_vector, 1)
 
     def normalize(self):
-        self.RBF_kernal()
+        self.get_mean_and_std()
+        self.generate_RBF(self.n_kernals)
 
         for sample in self.samples:
+            sample.curr_state = self.normalize_sample(sample.curr_state)
+            sample.next_state = self.normalize_sample(sample.next_state)
 
-            # Normalize wrt mean and standard deviation, map to RBF and add a bias term:
-
-            sample.curr_phi = np.append(np.exp(-np.divide(np.abs(sample.curr_state - self.means), self.stds)), 1)
-            # sample.curr_phi = np.append(np.divide((sample.curr_state - self.means), self.stds), 1)
-
-            sample.next_phi = np.append(np.exp(-np.divide(np.abs(sample.next_state - self.means), self.stds)), 1)
-            # sample.next_phi = np.append(np.divide((sample.next_state - self.means), self.stds), 1)
-
-            # print('after:', sample.curr_phi)
+            sample.curr_phi = self.map2phi(sample.curr_state)
+            sample.next_phi = self.map2phi(sample.next_state)
 
         self.generate_phi()
 
     def normalize_sample(self, new_sample):
-        return np.append(np.exp(-np.divide(np.abs(new_sample - self.means), self.stds)), 1)
-        # return np.append(np.divide((new_sample - self.means), self.stds), 1)
+        # return np.append(np.exp(-np.divide(np.abs(new_sample - self.means), self.stds)), 1)
+        return np.divide((new_sample - self.means), self.stds)
 
     def generate_phi(self):
+        spacing = int(self.n_kernals**2 + 1)
         for i, sample in enumerate(self.samples):
-            self.phi[i, sample.curr_action * 3:sample.curr_action * 3 + len(sample.curr_phi)] = sample.curr_phi
+            self.phi[i, sample.curr_action * spacing:sample.curr_action * spacing + spacing] = sample.curr_phi
             self.reward[i] = sample.reward
             for position in range(3):
-                self.phi_next[i, position * 3:position * 3 + len(sample.next_phi), position] = sample.next_phi
+                self.phi_next[i, position * spacing:position * spacing + spacing, position] = sample.next_phi
 
-    def generate_phi_sample(self, new_sample):
-        phi = np.zeros((3 * (len(self.environment.observation_space.sample()) + 1), 3))
+    def add_action_space(self, new_sample):
+        spacing = int(self.n_kernals**2 + 1)
+        phi = np.zeros((3*spacing, 3))
         for action in range(3):
-            phi[action * 3:action * 3 + len(new_sample), action] = new_sample
+            phi[action * spacing:action * spacing + spacing, action] = new_sample
         return phi
 
     def state2phi(self, new_sample):
         new_sample = self.normalize_sample(new_sample)
-        return self.generate_phi_sample(new_sample)
+        return self.add_action_space(self.map2phi(new_sample))
 
 
 class LSPIModel:
@@ -92,13 +105,13 @@ class LSPIModel:
         self.env = env
         self.gamma = gamma
         self.batch_size = 0
-        self.max_iterations = 60
-        self.epsilon = 1e-4
+        self.max_iterations = 20
+        self.epsilon = 1e-6
 
     def train(self, dataset, method='TD0'):
 
         self.batch_size = len(dataset.samples)
-        theta = np.random.rand(9)
+        theta = np.random.rand(3*(dataset.n_kernals**2+1))
         done = False
         iteration = 0
         if method == 'TD0':
@@ -119,7 +132,7 @@ class LSPIModel:
                 if iteration > self.max_iterations:
                     done = True
 
-                if not np.mod(iteration, 20):
+                if not np.mod(iteration, 10):
                     print(iteration)
 
             print(iteration)
