@@ -7,8 +7,6 @@
       <change afterPath="$PROJECT_DIR$/../DL_HW3" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../DL_HW4" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../DL_Project" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Q3_LSPI.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../SpeedAndCountPython" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../amazonDLcourse.pem" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../backup/backup.py" afterDir="false" />
@@ -17,6 +15,7 @@
       <change afterPath="$PROJECT_DIR$/../detection/car_detection_tests.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../detection/darknet" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../detection/devicehive-video-analysis" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mountain_car_with_data_collection.py" beforeDir="false" afterPath="$PROJECT_DIR$/mountain_car_with_data_collection.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -106,7 +105,7 @@
     </findStrings>
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
@@ -249,12 +248,12 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1561790576237</updated>
-      <workItem from="1561790577945" duration="17106000" />
+      <workItem from="1561790577945" duration="17395000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="17106000" />
+    <option name="totallyTimeSpent" value="17395000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1440" height="900" extended-state="6" />
