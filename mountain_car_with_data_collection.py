@@ -151,11 +151,11 @@ if __name__ == '__main__':
     #     env.render()
     #     print(r)
     # set specific
-    env.reset_specific(0.3, 0.0)
+    env.reset_specific(0.35, 0.0)
     env.render()
     is_done = False
     while not is_done:
-        state, r, is_done, _ = env.step(1)  # go left
+        state, r, is_done, _ = env.step(2)  # go left
         env.render()
         print('reward:', r, ', state:', state)
     env.close()

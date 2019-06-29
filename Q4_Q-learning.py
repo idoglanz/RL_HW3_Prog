@@ -19,13 +19,23 @@ class DataSet:
         self.n_samples = N
         self.samples = []
         self.episodes = 0
-        self.means = np.array(2)
-        self.stds = np.array(2)
+        self.means = np.array([0.6,0])
+        self.stds = np.array([0.01, 0.01])
         self.phi = np.zeros((N, 3 * (len(self.environment.observation_space.sample()) + 1)))
         self.reward = np.zeros(N)
         self.phi_next = np.zeros((N, 3 * (len(self.environment.observation_space.sample()) + 1), 3))
 
-        self.collect_data()
+        # self.collect_data()
+
+    def epsilon_greedy(self, phi_state, theta, epsilon):
+
+        a_space = np.dot(phi_state.T, theta)
+
+        if np.random.rand(1) > epsilon:
+            return np.argmax(a_space)
+        else:
+            action = np.round(np.random.uniform(0, 2))
+            return action
 
     def collect_data(self):
         for i in range(self.n_samples):
@@ -43,10 +53,10 @@ class DataSet:
         for i, sample in enumerate(self.samples):
             temp_vectors[i] = (sample.curr_state + sample.next_state)/2
 
-        # self.means = np.mean(temp_vectors, axis=0)
-        self.means = np.array([0.6, -0.03])
-        # self.stds = np.std(temp_vectors, axis=0)
-        self.stds = np.array([0.9, 0.01])
+        self.means = np.mean(temp_vectors, axis=0)
+        # self.means = np.array([0,0])
+        self.stds = np.std(temp_vectors, axis=0)
+        # self.stds = np.array([1.8, 0.14])
 
     def normalize(self):
         self.RBF_kernal()
@@ -54,11 +64,9 @@ class DataSet:
         for sample in self.samples:
 
             # Normalize wrt mean and standard deviation, map to RBF and add a bias term:
-            
-            sample.curr_phi = np.append(np.exp(-np.divide(np.abs(sample.curr_state - self.means), self.stds)), 1)
+            sample.curr_phi = np.append(np.exp(-np.divide(np.abs(sample.curr_state - self.means)**2, self.stds**2)), 1)
             # sample.curr_phi = np.append(np.divide((sample.curr_state - self.means), self.stds), 1)
-
-            sample.next_phi = np.append(np.exp(-np.divide(np.abs(sample.next_state - self.means), self.stds)), 1)
+            sample.next_phi = np.append(np.exp(-np.divide(np.abs(sample.next_state - self.means)**2, self.stds**2)), 1)
             # sample.next_phi = np.append(np.divide((sample.next_state - self.means), self.stds), 1)
 
             # print('after:', sample.curr_phi)
@@ -66,7 +74,7 @@ class DataSet:
         self.generate_phi()
 
     def normalize_sample(self, new_sample):
-        return np.append(np.exp(-np.divide(np.abs(new_sample - self.means), self.stds)), 1)
+        return np.append(np.exp(-np.divide(np.abs(new_sample - self.means)**2, self.stds**2)), 1)
         # return np.append(np.divide((new_sample - self.means), self.stds), 1)
 
     def generate_phi(self):
@@ -87,12 +95,37 @@ class DataSet:
         return self.generate_phi_sample(new_sample)
 
 
+class Qlearn:
+    def __init__(self, environment, alpha=0.1):
+        self.env = environment
+        self.alpha = alpha
+        self.theta = np.random.rand(9)
+
+    def collect_data(self, epsilon, max_samples=1000):
+        iteration = 0
+        done = False
+        state = self.env.reset()
+        games_played = 0
+        while iteration < max_samples:
+            phi_state = data.state2phi(state)
+            action = data.epsilon_greedy(phi_state, self.theta, epsilon=epsilon)
+            next_state, reward, done, _ = self.env.step(action)
+            data.samples.append(Sample(state, action, reward, next_state))
+            if done:
+                state = self.env.reset()
+                done = False
+                games_played += 1
+            iteration += 1
+
+    def learn(self):
+        self.theta += self.alpha * 
+
 class LSPIModel:
     def __init__(self, env, gamma=0.99):
         self.env = env
         self.gamma = gamma
         self.batch_size = 0
-        self.max_iterations = 60
+        self.max_iterations = 120
         self.epsilon = 1e-4
 
     def train(self, dataset, method='TD0'):
