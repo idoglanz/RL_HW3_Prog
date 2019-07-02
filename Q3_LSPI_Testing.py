@@ -21,6 +21,7 @@ class DataSet:
         self.episodes = 0
         self.RBF_kernals = []
         self.n_kernals = 1
+
         self.size_phi = self.n_kernals + 2
         self.means = np.array(2)
         self.stds = np.array(2)
@@ -60,8 +61,8 @@ class DataSet:
         phi_vector = np.zeros(int(self.n_kernals))
         for i, kernel in enumerate(self.RBF_kernals):
             phi_vector[i] = np.sum(np.exp(-np.abs(state - kernel)**2/self.stds))
-        # return np.append(phi_vector, [state[0]**2, state[1]**2, np.sign(state[1]), 1])
-        return np.append(phi_vector, [np.sign(state[1]), 1])
+
+        return np.append(phi_vector, [state[0]**2, state[1]**2, np.sign(state[1]), 1])
 
     def normalize(self):
         self.get_mean_and_std()

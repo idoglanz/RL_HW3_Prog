@@ -15,7 +15,9 @@
       <change afterPath="$PROJECT_DIR$/../detection/car_detection_tests.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../detection/darknet" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/../detection/devicehive-video-analysis" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+
+      <change beforePath="$PROJECT_DIR$/Q3_LSPI_Testing.py" beforeDir="false" afterPath="$PROJECT_DIR$/Q3_LSPI_Testing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Q4_Q-learning.py" beforeDir="false" afterPath="$PROJECT_DIR$/Q4_Q-learning.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -26,7 +28,8 @@
   <component name="CoverageDataManager">
     <SUITE FILE_PATH="coverage/RL_HW3_Prog$mountain_car_with_data_collection.coverage" NAME="mountain_car_with_data_collection Coverage Results" MODIFIED="1561824415694" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/RL_HW3_Prog$tests.coverage" NAME="tests Coverage Results" MODIFIED="1561807222352" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/RL_HW3_Prog$Q3_LSPI_Testing.coverage" NAME="Q3_LSPI_Testing Coverage Results" MODIFIED="1562004657746" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+
+    <SUITE FILE_PATH="coverage/RL_HW3_Prog$Q3_LSPI_Testing.coverage" NAME="Q3_LSPI_Testing Coverage Results" MODIFIED="1561964749854" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/RL_HW3_Prog$Q3_LSPI.coverage" NAME="Q3_LSPI Coverage Results" MODIFIED="1561839223838" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="FileEditorManager">
@@ -34,8 +37,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/mountain_car_with_data_collection.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="325">
-              <caret line="68" lean-forward="true" selection-start-line="68" selection-end-line="68" />
+            <state relative-caret-position="885">
+              <caret line="59" column="48" selection-start-line="59" selection-start-column="41" selection-end-line="59" selection-end-column="48" />
               <folding>
                 <element signature="e#109#120#0" expanded="true" />
               </folding>
@@ -59,8 +62,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Q3_LSPI_Testing.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="225">
-              <caret line="23" column="42" selection-start-line="23" selection-start-column="42" selection-end-line="23" selection-end-column="42" />
+            <state relative-caret-position="149">
+              <caret line="161" column="25" selection-start-line="161" selection-start-column="25" selection-end-line="161" selection-end-column="25" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
                 <element signature="e#87#397#0" />
@@ -283,26 +286,20 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1561790576237</updated>
-      <workItem from="1561790577945" duration="59404000" />
-    </task>
-    <task id="LOCAL-00001" summary="hkhk">
-      <created>1562073953729</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1562073953729</updated>
+
+      <workItem from="1561790577945" duration="58132000" />
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="59404000" />
+    <option name="totallyTimeSpent" value="58132000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1440" height="900" extended-state="6" />
     <layout>
       <window_info id="Favorites" side_tool="true" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.13233191" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.13233191" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Docker" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" />
@@ -312,7 +309,7 @@
       <window_info anchor="bottom" id="Event Log" sideWeight="0.5007153" side_tool="true" visible="true" weight="0.32891566" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49928468" weight="0.4373494" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49928468" visible="true" weight="0.4373494" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.43012047" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -449,6 +446,16 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/mountain_car_with_data_collection.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="885">
+          <caret line="59" column="48" selection-start-line="59" selection-start-column="41" selection-end-line="59" selection-end-column="48" />
+          <folding>
+            <element signature="e#109#120#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Q3_LSPI.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="450">
@@ -475,25 +482,15 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Q3_LSPI_Testing.py">
+    <entry file="file://$PROJECT_DIR$/mountain_car_with_data_collection.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="23" column="42" selection-start-line="23" selection-start-column="42" selection-end-line="23" selection-end-column="42" />
+        <state relative-caret-position="149">
+          <caret line="161" column="25" selection-start-line="161" selection-start-column="25" selection-end-line="161" selection-end-column="25" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
             <element signature="e#87#397#0" />
             <element signature="e#916#1307#0" />
             <element signature="e#1379#1650#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/mountain_car_with_data_collection.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="325">
-          <caret line="68" lean-forward="true" selection-start-line="68" selection-end-line="68" />
-          <folding>
-            <element signature="e#109#120#0" expanded="true" />
           </folding>
         </state>
       </provider>
