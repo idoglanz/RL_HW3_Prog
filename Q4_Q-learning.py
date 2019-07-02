@@ -118,7 +118,7 @@ class Qlearn:
             iteration += 1
 
     def learn(self):
-        self.theta += self.alpha * 
+        self.theta += self.alpha * 1
 
 class LSPIModel:
     def __init__(self, env, gamma=0.99):

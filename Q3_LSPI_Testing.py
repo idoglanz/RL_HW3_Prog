@@ -20,12 +20,13 @@ class DataSet:
         self.samples = []
         self.episodes = 0
         self.RBF_kernals = []
-        self.n_kernals = 4
+        self.n_kernals = 1
+        self.size_phi = self.n_kernals + 2
         self.means = np.array(2)
         self.stds = np.array(2)
-        self.phi = np.zeros((N, 3 * (self.n_kernals**2 + 1)))
+        self.phi = np.zeros((N, 3*self.size_phi))
         self.reward = np.zeros(N)
-        self.phi_next = np.zeros((N, 3 * (self.n_kernals**2 +1), 3))
+        self.phi_next = np.zeros((N, 3*self.size_phi, 3))
 
         self.collect_data()
 
@@ -49,19 +50,18 @@ class DataSet:
         self.stds = np.std(temp_vectors, axis=0)
 
     def generate_RBF(self, n):
-        centers = np.arange(float(n))/float(n)
-        centers = np.random.uniform(-1, 1, n)
+        centers_position = np.linspace(0.6, 0.6, n)
+        centers_velocity = np.linspace(0.07, 0.07, n)
         for i in range(n):
-            for j in range(n):
-                self.RBF_kernals.append([centers[i], centers[j]])
+            self.RBF_kernals.append([centers_position[i], centers_velocity[i]])
         print(self.RBF_kernals)
 
     def map2phi(self, state):
-        bandwidth = 100
-        phi_vector = np.zeros(int(self.n_kernals**2))
+        phi_vector = np.zeros(int(self.n_kernals))
         for i, kernel in enumerate(self.RBF_kernals):
-            phi_vector[i] = np.sum(np.exp(-np.abs(state - kernel)/bandwidth))
-        return np.append(phi_vector, 1)
+            phi_vector[i] = np.sum(np.exp(-np.abs(state - kernel)**2/self.stds))
+        # return np.append(phi_vector, [state[0]**2, state[1]**2, np.sign(state[1]), 1])
+        return np.append(phi_vector, [np.sign(state[1]), 1])
 
     def normalize(self):
         self.get_mean_and_std()
@@ -74,14 +74,13 @@ class DataSet:
             sample.curr_phi = self.map2phi(sample.curr_state)
             sample.next_phi = self.map2phi(sample.next_state)
 
-        self.generate_phi()
+        self.generate_phi_array()
 
     def normalize_sample(self, new_sample):
-        # return np.append(np.exp(-np.divide(np.abs(new_sample - self.means), self.stds)), 1)
         return np.divide((new_sample - self.means), self.stds)
 
-    def generate_phi(self):
-        spacing = int(self.n_kernals**2 + 1)
+    def generate_phi_array(self):
+        spacing = int(self.size_phi)
         for i, sample in enumerate(self.samples):
             self.phi[i, sample.curr_action * spacing:sample.curr_action * spacing + spacing] = sample.curr_phi
             self.reward[i] = sample.reward
@@ -89,7 +88,7 @@ class DataSet:
                 self.phi_next[i, position * spacing:position * spacing + spacing, position] = sample.next_phi
 
     def add_action_space(self, new_sample):
-        spacing = int(self.n_kernals**2 + 1)
+        spacing = int(self.size_phi)
         phi = np.zeros((3*spacing, 3))
         for action in range(3):
             phi[action * spacing:action * spacing + spacing, action] = new_sample
@@ -105,13 +104,14 @@ class LSPIModel:
         self.env = env
         self.gamma = gamma
         self.batch_size = 0
-        self.max_iterations = 20
+        self.max_iterations = 10
         self.epsilon = 1e-6
 
     def train(self, dataset, method='TD0'):
 
         self.batch_size = len(dataset.samples)
-        theta = np.random.rand(3*(dataset.n_kernals**2+1))
+        theta = np.random.rand(3*dataset.size_phi)
+
         done = False
         iteration = 0
         if method == 'TD0':
@@ -128,11 +128,12 @@ class LSPIModel:
                 theta = np.dot(np.linalg.inv(C), d)
                 iteration += 1
 
-                # if np.sum((prev_theta-theta)**2) <= self.epsilon or iteration > self.max_iterations:
-                if iteration > self.max_iterations:
+                if np.sum((prev_theta-theta)**2) <= self.epsilon or iteration > self.max_iterations:
+                # if iteration > self.max_iterations:
                     done = True
 
                 if not np.mod(iteration, 10):
+                    print(np.sum((prev_theta-theta)**2))
                     print(iteration)
 
             print(iteration)
@@ -158,10 +159,11 @@ class LSPIModel:
 
 if __name__ == '__main__':
     env = sim.MountainCarWithResetEnv()
-    data = DataSet(env, 100000)
+    data = DataSet(env, 40000)
     data.normalize()
 
     state = env.reset()
+    print('Initial state:', state)
     # state = env.reset_specific(0.3, 0.0)
 
     is_done = False
