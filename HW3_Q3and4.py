@@ -42,6 +42,7 @@ class DataSet:
 
     def collect_data(self):
         for i in range(self.n_samples):
+
             curr_state = self.environment.observation_space.sample()
             action = self.environment.action_space.sample()
 
@@ -54,6 +55,7 @@ class DataSet:
 
         for _ in range(self.trajectories):
             curr_state = self.environment.reset()
+
             action = self.environment.action_space.sample()
             done = False
             trip = 0
@@ -155,8 +157,8 @@ class LSPIModel:
         self.epsilon = epsilon
         self.theta = np.random.rand(theta_size)
 
-    def train(self, dataset):
-
+    def train(self, dataset, simulation=0):
+        simulation.inittial_starts()
         self.batch_size = len(dataset.samples)
 
         done = False
@@ -171,8 +173,9 @@ class LSPIModel:
 
             prev_theta = self.theta
             self.theta = np.dot(np.linalg.inv(C), d)
-            iteration += 1
+            simulation.success(theta=self.theta)
 
+            iteration += 1
             # if np.sum((prev_theta-self.theta)**2) <= self.epsilon or iteration > self.max_iterations:
             if iteration > self.max_iterations:
                 done = True
@@ -256,11 +259,13 @@ class PolicyGradient:
 
 
 class PlaySimulation:
-    def __init__(self, env, data):
+    def __init__(self, env):
         self.env = env
-        self.data = data
+        self.data = []
+        self.start_states = []
 
     def play(self, theta, how_long_time=10):
+
         state = self.env.reset()
         is_done = False
         self.env.render()
@@ -281,35 +286,44 @@ class PlaySimulation:
         self.env.close()
 
     def success(self, theta, starting=10, how_long_iterations=10000):
-        success_rate = 0.
+        success_rate = np.zeros(starting)
         for i in range(starting):
             state = self.env.reset()
+            for _ in range(5):
+                for _ in range(how_long_iterations):
+                    phi_state = self.data.state2phi(state)
+                    Q = np.dot(phi_state.T, theta)
+                    action = np.argmax(Q)
+                    state, r, is_done, _ = self.env.step(action)
+                    if is_done:
+                        success_rate[i] += 1
+                        break
 
-            for _ in range(how_long_iterations):
-                phi_state = self.data.state2phi(state)
-                Q = np.dot(phi_state.T, theta)
-                action = np.argmax(Q)
-                state, r, is_done, _ = self.env.step(action)
-                if is_done:
-                    success_rate += 1
-                    break
+        return success_rate/starting * 100.
 
-        return success_rate/starting * 100
+    def inittial_starts(self, starts):
+        self.start_states = np.zeros((starts, 2))
+
+        for i in range(starts):
+            self.start_states[i] = self.env.reset()
 
 
 def q3_testing_the_model(env):
     print('Q3 - testing the model')
     method = 'LSPI'
+    simulation = PlaySimulation(env)
 
     for max_iterations in range(0, 10, 1):
+        env.seed(1)
         model = LSPIModel(env, gamma=0.999, max_iterations=max_iterations, epsilon=0, theta_size=15)
         data = DataSet(env, 10000, method=method)
         data.collect()
         data.normalize()
+
         theta = model.train(data)
 
-        PlaySimulation(env, data).play(theta)
-        # print(PlaySimulation(env, data).success(theta, starting=10))
+        # PlaySimulation(env, data).play(theta)
+        print(PlaySimulation(env, data).success(theta, starting=5))
 
 
 def q4_testing_the_model(env):
@@ -326,8 +340,16 @@ def q4_testing_the_model(env):
 if __name__ == '__main__':
     env = sim.MountainCarWithResetEnv()
 
+    # for _ in range(10):
+    #     print(env.np_random.rand(2))
+    #     print(env.np_random(1))
+    # print('new')
+    # env.seed(1)
+    # for _ in range(10):
+    #     print(env.np_random.rand(2))
+
     q3_testing_the_model(env)
-    q4_testing_the_model(env)
+    # q4_testing_the_model(env)
 
 
 
@@ -348,3 +370,4 @@ if __name__ == '__main__':
     #
     # PlaySimulation(env, data).play(theta)
 
+########################################################################################################################
