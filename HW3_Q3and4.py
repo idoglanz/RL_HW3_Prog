@@ -1,5 +1,4 @@
 import numpy as np
-import random
 import mountain_car_with_data_collection as sim
 import time
 
@@ -31,6 +30,11 @@ class DataSet:
         self.method = method
         self.iteration = iteration
 
+    def reset_data(self):
+        self.samples = []
+
+    def collect(self, theta=0, iteration=1):
+        self.iteration = iteration
         if self.method == 'LSPI':
             self.collect_data()
         if self.method == 'Q_learning':
@@ -46,6 +50,7 @@ class DataSet:
             self.samples.append(Sample(curr_state, action, reward, next_state))
 
     def collect_data_with_trajectory(self, theta):
+        self.reset_data()
 
         for _ in range(self.trajectories):
             curr_state = self.environment.reset()
@@ -120,7 +125,7 @@ class DataSet:
                     sample.next_phi)] = sample.next_phi
                 self.reward[i] = sample.reward
 
-        else:
+        if self.method == 'LSPI':
             self.phi_next = np.zeros((len(self.samples), 3 * len(self.samples[0].curr_phi), 3))
 
             for i, sample in enumerate(self.samples):
@@ -142,7 +147,7 @@ class DataSet:
 
 
 class LSPIModel:
-    def __init__(self, env, gamma=0.99, max_iterations=5, epsilon=1e-6, theta_size=0, method='LSPI'):
+    def __init__(self, env, gamma=0.99, max_iterations=5, epsilon=0, theta_size=0):
         self.env = env
         self.gamma = gamma
         self.batch_size = 0
@@ -168,11 +173,11 @@ class LSPIModel:
             self.theta = np.dot(np.linalg.inv(C), d)
             iteration += 1
 
-            if np.sum((prev_theta-self.theta)**2) <= self.epsilon or iteration > self.max_iterations:
-            # if iteration > self.max_iterations:
+            # if np.sum((prev_theta-self.theta)**2) <= self.epsilon or iteration > self.max_iterations:
+            if iteration > self.max_iterations:
                 done = True
 
-        print(iteration)
+        # print(iteration)
 
         return self.theta
 
@@ -190,7 +195,39 @@ class LSPIModel:
 
 
 class QLearning:
-    def __init__(self, env, alpha=1, batch_size=10000, max_iterations=100, trajectories=100, epsilon=0, theta_size=9):
+    def __init__(self, env, alpha=1, batch_size=1, max_iterations=100, trajectories=100, epsilon=0, theta_size=9):
+        self.env = env
+        self.alpha = alpha
+        self.theta = np.random.rand(theta_size)
+
+        self.batch_size = batch_size
+        self.trajectories = trajectories
+        self.max_iterations = max_iterations
+        self.epsilon = epsilon
+
+    def train(self):
+        iteration = 1
+        done = False
+        data = DataSet(env, N=self.batch_size, trajectories=self.trajectories, method='Q_learning', iteration=iteration)
+        while not done:
+            data.collect(theta=self.theta, iteration=iteration)
+            data.normalize()
+
+            # self.theta = self.theta + (self.alpha/(self.batch_size*self.trajectories)) * np.dot(data.reward  * np.dot(data.phi_next, self.theta) - np.dot(data.phi, self.theta), data.phi)
+            self.theta = self.theta + (self.alpha/len(data.samples)) *\
+                         np.dot(data.reward * np.dot(data.phi_next, self.theta) - np.dot(data.phi, self.theta), data.phi)
+
+            # print(self.theta)
+            prev_theta = self.theta
+            iteration += 1
+            if iteration > self.max_iterations:
+                done = True
+
+        return self.theta, data
+
+
+class PolicyGradient:
+    def __init__(self, env, alpha=1, batch_size=1, max_iterations=100, trajectories=100, epsilon=0, theta_size=9):
         self.env = env
         self.alpha = alpha
         self.theta = np.random.rand(theta_size)
@@ -207,9 +244,9 @@ class QLearning:
             data = DataSet(env, N=self.batch_size, trajectories=self.trajectories, method='Q_learning', theta=self.theta, iteration=iteration)
             data.normalize()
 
-            # self.theta = self.theta + (self.alpha/(self.batch_size*self.trajectories)) * np.dot(data.reward  * np.dot(data.phi_next, self.theta) - np.dot(data.phi, self.theta), data.phi)
             self.theta = self.theta + (self.alpha/(len(data.samples))) * np.dot(data.reward  * np.dot(data.phi_next, self.theta) - np.dot(data.phi, self.theta), data.phi)
-            print(self.theta)
+
+            # print(self.theta)
             prev_theta = self.theta
             iteration += 1
             if iteration > self.max_iterations:
@@ -218,33 +255,96 @@ class QLearning:
         return self.theta, data
 
 
-if __name__ == '__main__':
-    env = sim.MountainCarWithResetEnv()
-    # method = 'LSPI'
-    method = 'Q_learning'
+class PlaySimulation:
+    def __init__(self, env, data):
+        self.env = env
+        self.data = data
 
-    if method == 'LSPI':
-        model = LSPIModel(env, method=method, gamma=0.999, max_iterations=200, epsilon=1e-10, theta_size=15)
+    def play(self, theta, how_long_time=10):
+        state = self.env.reset()
+        is_done = False
+        self.env.render()
+        start_time = time.time()
+
+        while not is_done:
+            phi_state = self.data.state2phi(state)
+            Q = np.dot(phi_state.T, theta)
+            action = np.argmax(Q)
+            state, r, is_done, _ = self.env.step(action)
+            self.env.render()
+
+            time.sleep(0.01)  # TODO: delete pause action
+            # print('action: ', action, 'reward:', r, ', state:', state)
+            if time.time() - start_time > how_long_time:
+                break
+
+        self.env.close()
+
+    def success(self, theta, starting=10, how_long_iterations=10000):
+        success_rate = 0.
+        for i in range(starting):
+            state = self.env.reset()
+
+            for _ in range(how_long_iterations):
+                phi_state = self.data.state2phi(state)
+                Q = np.dot(phi_state.T, theta)
+                action = np.argmax(Q)
+                state, r, is_done, _ = self.env.step(action)
+                if is_done:
+                    success_rate += 1
+                    break
+
+        return success_rate/starting * 100
+
+
+def q3_testing_the_model(env):
+    print('Q3 - testing the model')
+    method = 'LSPI'
+
+    for max_iterations in range(0, 10, 1):
+        model = LSPIModel(env, gamma=0.999, max_iterations=max_iterations, epsilon=0, theta_size=15)
         data = DataSet(env, 10000, method=method)
+        data.collect()
         data.normalize()
         theta = model.train(data)
-        print('Theta:', theta)
 
-    if method == 'Q_learning':
-        model = QLearning(env, alpha=0.1, batch_size=1, trajectories=50, max_iterations=100, epsilon=1e-4, theta_size=15)
+        PlaySimulation(env, data).play(theta)
+        # print(PlaySimulation(env, data).success(theta, starting=10))
+
+
+def q4_testing_the_model(env):
+    print('Q4 - testing the model')
+
+    for max_iterations in range(10, 100, 10):
+        model = QLearning(env, alpha=0.1, batch_size=1, trajectories=100, max_iterations=max_iterations, epsilon=1e-4, theta_size=15)
         theta, data = model.train()
 
-    state = env.reset()
-    is_done = False
-    env.render()
+        PlaySimulation(env, data).play(theta)
+        print(PlaySimulation(env, data).success(theta, starting=10))
 
-    while not is_done:
-        phi_state = data.state2phi(state)
-        Q = np.dot(phi_state.T, theta)
-        action = np.argmax(Q)
-        print(action)
-        state, r, is_done, _ = env.step(action)
-        time.sleep(0.01)  # TODO: delete pause action
-        env.render()
-        print('reward:', r, ', state:', state)
-    env.close()
+
+if __name__ == '__main__':
+    env = sim.MountainCarWithResetEnv()
+
+    q3_testing_the_model(env)
+    q4_testing_the_model(env)
+
+
+
+    # method = 'LSPI'
+    # method = 'Q_learning'
+    #
+    # if method == 'LSPI':
+    #     model = LSPIModel(env, gamma=0.999, max_iterations=200, epsilon=1e-10, theta_size=15)
+    #     data = DataSet(env, 10000, method=method)
+    #     data.collect()
+    #     data.normalize()
+    #     theta = model.train(data)
+    #     print('Theta:', theta)
+    #
+    # if method == 'Q_learning':
+    #     model = QLearning(env, alpha=0.1, batch_size=1, trajectories=100, max_iterations=100, epsilon=1e-4, theta_size=15)
+    #     theta, data = model.train()
+    #
+    # PlaySimulation(env, data).play(theta)
+
