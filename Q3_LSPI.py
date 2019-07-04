@@ -1,7 +1,8 @@
 import numpy as np
 import random
 import mountain_car_with_data_collection as sim
-
+from LSPI import *
+from QLearning import *
 
 class Sample:
     def __init__(self, state, action, reward, next_state):
@@ -77,53 +78,7 @@ class DataSet:
         return self.generate_phi_sample(new_sample)
 
 
-class LSPIModel:
-    def __init__(self, env, gamma=0.99):
-        self.env = env
-        self.gamma = gamma
-        self.batch_size = 0
-        self.max_iterations = 10000
-        self.epsilon = 1e-4
 
-    def train(self, dataset, method='TD0'):
-
-        self.batch_size = len(dataset.samples)
-        theta = np.ones(9) / 9
-        done = False
-        iteration = 0
-        if method == 'TD0':
-
-            while not done:
-                d = np.dot(dataset.phi.T, dataset.reward) / self.batch_size
-
-                # generate a phi vector for each possible action:
-
-                max_phi_next = self.find_argmax_a(theta, dataset.phi_next)
-                C = np.dot(dataset.phi.T, (dataset.phi - self.gamma * max_phi_next)) / self.batch_size
-
-                prev_theta = theta
-                theta = np.dot(np.linalg.inv(C), d)
-                iteration += 1
-
-                # if np.sum((prev_theta-theta)**2) <= self.epsilon or iteration > self.max_iterations:
-                if iteration > self.max_iterations:
-                    done = True
-
-            print(iteration)
-
-        return theta
-
-    def find_argmax_a(self, theta, phi_next):
-        a_space = np.zeros((len(phi_next), 3))
-        phi_next_argmax = np.zeros((len(phi_next), len(theta)))
-
-        for position in range(3):
-            a_space[:, position] = np.matmul(phi_next[:, :, position], theta)
-
-        for row in range(len(phi_next)):
-            phi_next_argmax[row, :] = phi_next[row, :, np.argmax(a_space[row])]
-
-        return phi_next_argmax
 
     #
     # def generate_batch(self, dataset):
