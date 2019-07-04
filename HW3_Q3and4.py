@@ -10,8 +10,8 @@ from util import *
 def q3_testing_the_model(env):
     print('Q3 - testing the model')
 
-    for N in [10000, 5000, 1000, 20000]:
-    # for N in [10000]:
+    # for N in [10000, 5000, 1000, 20000]:
+    for N in [10000]:
 
         method = 'LSPI'
         evaluation = 5
@@ -36,8 +36,8 @@ def q3_testing_the_model(env):
 
 def q4_testing_the_model(env):
     print('Q4 - testing the model')
-    # for epsilon_greedy in [1]:
-    for epsilon_greedy in [1, 2, 0.5]:
+    for epsilon_greedy in [1]:
+    # for epsilon_greedy in [1, 2, 0.5]:
 
         evaluation = 5
         eval_by_n_starts = 10
