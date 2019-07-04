@@ -3,6 +3,7 @@ import mountain_car_with_data_collection as sim
 # import time
 from LSPI import *
 from QLearning import *
+from PolicyGradient import *
 from util import *
 
 
@@ -10,12 +11,13 @@ def q3_testing_the_model(env):
     print('Q3 - testing the model')
 
     for N in [10000, 5000, 1000, 20000]:
+    # for N in [10000]:
 
         method = 'LSPI'
         evaluation = 5
         success_rate_final = np.zeros((evaluation, 2))
         success_rate = list()
-        max_iterations = 3
+        max_iterations = 20
 
         for i in range(evaluation):
             model = LSPIModel(env, gamma=0.999, max_iterations=max_iterations, epsilon=0, theta_size=15)
@@ -47,7 +49,7 @@ def q4_testing_the_model(env):
         success_rate.append(success_rate_temp)
 
     plot_success(success_rate, max_iteration=max_iterations, average=evaluation, N=10)
-    print('success rate: ', success_rate_final[:, 0], 'iterations', success_rate_final[:, 1])
+    # print('success rate: ', success_rate_final[:, 0], 'iterations', success_rate_final[:, 1])
 
     plt.show()
 
@@ -61,5 +63,6 @@ if __name__ == '__main__':
     q3_testing_the_model(env)
     # q4_testing_the_model(env)
 
+    PolicyGradient(env)
 
 #######################################################################################################################

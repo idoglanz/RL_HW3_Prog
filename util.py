@@ -216,11 +216,22 @@ class PlaySimulation:
 
 
 def plot_success(success_rate, max_iteration, average, N):
-    mean_success = np.zeros(max_iteration)
-    for iterations in range(max_iteration):
-        for success in enumerate(success_rate):
-            mean_success[iterations] += success[1][iterations] / average
 
-    plt.plot(mean_success, label=N)
+    mean_success = np.zeros((average, max_iteration))
+    # mean_success = np.zeros(max_iteration)
+    # for iterations in range(max_iteration):
+    #     for success in enumerate(success_rate):
+    #         mean_success[iterations] += success[1][iterations] / average
+    for i, success in enumerate(success_rate):
+        mean_success[i] = success[:max_iteration]
+        # mean_success[i] = success[1]
+    mean_success = np.mean(mean_success, axis=0)
+
+    plt.plot(mean_success, label=['number of samples: ', + N])
+    # plt.plot(mean_success)
+    # plt.title()
+    plt.xlabel('LSPI iterations')
+    plt.ylabel('Average success')
+    plt.ylim([0, 110])
+    plt.grid()
     plt.legend()
-
