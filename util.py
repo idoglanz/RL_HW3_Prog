@@ -17,7 +17,7 @@ class Sample:
 
 
 class DataSet:
-    def __init__(self, env, N=10000, method='LSPI', theta=0, trajectories=1, iteration=1, epsilon_greedy_val=0):
+    def __init__(self, env, N=10000, method='LSPI', theta=0, trajectories=1, iteration=1, epsilon_greedy_val=0, epsilon_greedy_val_flag=0):
         self.environment = env
         self.n_samples = N
         self.trajectories = trajectories
@@ -31,6 +31,7 @@ class DataSet:
         self.method = method
         self.iteration = iteration
         self.epsilon_greedy_val = epsilon_greedy_val
+        self.epsilon_greedy_val_flag = epsilon_greedy_val_flag
 
     def reset_data(self):
         self.samples = []
@@ -84,8 +85,13 @@ class DataSet:
         probability = np.array([self.iteration, 1., 1., 1.])
         probability /= np.sum(probability)
 
-        if self.epsilon_greedy_val:
-            probability = np.array([1-self.epsilon_greedy_val, self.epsilon_greedy_val/3, self.epsilon_greedy_val/3, self.epsilon_greedy_val/3])
+        if self.epsilon_greedy_val_flag:
+            self.epsilon_greedy_val = 1/np.sqrt(self.iteration.__float__())
+            if self.epsilon_greedy_val > 1:
+                probability = np.array([0, self.epsilon_greedy_val/3., self.epsilon_greedy_val/3., self.epsilon_greedy_val/3.])
+            else:
+                probability = np.array([1-self.epsilon_greedy_val, (self.epsilon_greedy_val*self.epsilon_greedy_val_flag)/3., (self.epsilon_greedy_val*self.epsilon_greedy_val_flag)/3., (self.epsilon_greedy_val*self.epsilon_greedy_val_flag)/3.])
+            probability /= np.sum(probability)
 
         action = np.random.choice([max_action, 0, 1, 2], 1, p=probability)  # TODO: prob choice.....
         # phi_next_argmax[row, :] = phi_next[row, :, choose_action]
@@ -227,10 +233,10 @@ def plot_success(success_rate, max_iteration, average, N):
         # mean_success[i] = success[1]
     mean_success = np.mean(mean_success, axis=0)
 
-    plt.plot(mean_success, label=['number of samples: ', + N])
+    plt.plot(mean_success, label=['Epsilon_t times: ', + N])
     # plt.plot(mean_success)
     # plt.title()
-    plt.xlabel('LSPI iterations')
+    plt.xlabel('Q learning iterations')
     plt.ylabel('Average success')
     plt.ylim([0, 110])
     plt.grid()

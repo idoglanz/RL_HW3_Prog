@@ -36,20 +36,23 @@ def q3_testing_the_model(env):
 
 def q4_testing_the_model(env):
     print('Q4 - testing the model')
-    evaluation = 5
-    eval_by_n_starts = 10
-    success_rate_final = np.zeros((evaluation, 2))
-    success_rate = list()
-    max_iterations = 50
+    # for epsilon_greedy in [1]:
+    for epsilon_greedy in [1, 2, 0.5]:
 
-    for i in range(evaluation):
-        model = QLearning(env, alpha=0.1, batch_size=1, trajectories=100, max_iterations=max_iterations, epsilon=1e-4, theta_size=15, epsilon_greedy_val=0.1)
-        # theta, data = model.train()
-        theta, success_rate_final[i], success_rate_temp = model.train(eval_by_n_starts=eval_by_n_starts)
-        success_rate.append(success_rate_temp)
+        evaluation = 5
+        eval_by_n_starts = 10
+        success_rate_final = np.zeros((evaluation, 2))
+        success_rate = list()
+        max_iterations = 50
 
-    plot_success(success_rate, max_iteration=max_iterations, average=evaluation, N=10)
-    # print('success rate: ', success_rate_final[:, 0], 'iterations', success_rate_final[:, 1])
+        for i in range(evaluation):
+            model = QLearning(env, alpha=0.5, batch_size=10, trajectories=50, max_iterations=max_iterations, epsilon=1e-4, theta_size=15, epsilon_greedy_val=0, epsilon_greedy_val_flag=epsilon_greedy)
+            # theta, data = model.train()
+            theta, success_rate_final[i], success_rate_temp = model.train(eval_by_n_starts=eval_by_n_starts)
+            success_rate.append(success_rate_temp)
+
+        plot_success(success_rate, max_iteration=max_iterations, average=evaluation, N=epsilon_greedy)
+        # print('success rate: ', success_rate_final[:, 0], 'iterations', success_rate_final[:, 1])
 
     plt.show()
 
@@ -60,9 +63,9 @@ def q4_testing_the_model(env):
 if __name__ == '__main__':
     env = sim.MountainCarWithResetEnv()
 
-    q3_testing_the_model(env)
-    # q4_testing_the_model(env)
+    # q3_testing_the_model(env)
+    q4_testing_the_model(env)
 
-    PolicyGradient(env)
+    # PolicyGradient(env)
 
 #######################################################################################################################
